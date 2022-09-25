@@ -10,6 +10,11 @@ const skillModel = new mongoose.Schema({
         required: true,
         enum: ["Beginner", "Intermediate", "Advanced"]
     },
+    role: {
+        type: String,
+        required: true,
+        enum: ["Front-end", "Back-end"]
+    },
     image: {
         type: String,
         required: true

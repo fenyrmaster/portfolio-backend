@@ -5,7 +5,13 @@ const skillRouter = express.Router();
 
 skillRouter
     .route("/")
-    .get(skillController.getSkill)
+    .get(skillController.getSkills)
     .post(skillController.uploadSkillImg, skillController.createSkill);
+
+skillRouter
+    .route("/:id")
+    .get(skillController.getSkill)
+    .patch(skillController.uploadSkillImg, skillController.editSkill)
+    .delete(skillController.deleteSkill);
 
 module.exports = skillRouter;
