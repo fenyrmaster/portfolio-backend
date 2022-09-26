@@ -4,6 +4,7 @@ const skillModel = new mongoose.Schema({
     nombre: {
         type: String,
         required: true,
+        trim: true
     },
     level: {
         type: String,
