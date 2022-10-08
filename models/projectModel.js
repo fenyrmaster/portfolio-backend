@@ -23,7 +23,7 @@ const projectModel = new mongoose.Schema({
             textContent: [],
         }
     ],
-    imageThumbnail: {
+    image: {
         type: String,
         required: true
     },
