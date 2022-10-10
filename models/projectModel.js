@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const projectModel = new mongoose.Schema({
     nombre: {
@@ -10,7 +11,7 @@ const projectModel = new mongoose.Schema({
     focus: {
         type: String,
         required: true,
-        enum: ["Front-end", "Back-end", "Full-Stack"]
+        enum: ["Front end", "Back end", "Full Stack"]
     },
     usage:{
         type: String,
@@ -18,10 +19,6 @@ const projectModel = new mongoose.Schema({
         enum: ["Learning Project", "Real Project"]
     },
     text: [
-        {
-            textType: String,
-            textContent: [],
-        }
     ],
     image: {
         type: String,
@@ -49,7 +46,15 @@ const projectModel = new mongoose.Schema({
 });
 
 projectModel.pre("save", function(next) {
-    this.slug = slugify(this.name, {lower: true});
+    this.slug = slugify(this.nombre, {lower: true});
+    next();
+});
+
+projectModel.pre(/^find/, function(next){
+    this.populate({
+        path:"technologies",
+        select: "image"
+    });
     next();
 });
 

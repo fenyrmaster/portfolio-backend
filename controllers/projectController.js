@@ -6,6 +6,7 @@ const uuid = require("uuid");
 const cloudinary = require("cloudinary").v2;
 const Project = require("../models/projectModel");
 const APIfeatures = require("../utils/APIFeatures");
+const { json } = require("express");
 
 const multerStorage = multer.memoryStorage();
 
@@ -32,7 +33,7 @@ const crearFoto = async (request, oldPic) => {
     });
 
     //Editar la imagen y guardarla en cloudinary
-    const imagenProyecto = `proyecto-${uuid.v4()}-${request.body.nombre}`;
+    const imagenProyecto = `proyecto-${uuid.v4()}`;
     await sharp(request.files.imagenPortada[0].buffer).resize(1000,500).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/projects/${imagenProyecto}`);
     await cloudinary.uploader.upload(`public/img/projects/${imagenProyecto}`,{
         resource_type: "image",
@@ -48,20 +49,21 @@ const crearFoto = async (request, oldPic) => {
     let url = await cloudinary.image(imagenProyecto);
     let urlCortada = url.split("=")[1].split("'")[1];
     request.body.image = urlCortada;
+    request.body.gallery = [];
 
     // Proceso para todas las imagenes
-    if(req.files.imagenes){
-        await Promise.all(req.files.imagenes.map(async(file, index) => {
+    if(request.files.imagenes){
+        await Promise.all(request.files.imagenes.map(async(file, index) => {
             const filename = `proyecto-gal-${uuid.v4()}-${request.body.nombre}`;
-            await sharp(req.files.imagenes[index].buffer).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/projects/${filename}`);
+            await sharp(request.files.imagenes[index].buffer).toFormat("jpeg").jpeg({quality: 90}).toFile(`public/img/projects/${filename}`);
             await cloudinary.uploader.upload(`public/img/projects/${filename}`,{
                 resource_type: "image",
                 public_id: filename
             });
             let urlAqui = cloudinary.image(filename);
-            req.body.gallery.push(urlAqui.split("=")[1].split("'")[1]);
+            request.body.gallery.push(urlAqui.split("=")[1].split("'")[1]);
         }));
-        }
+    }
 };
 
 exports.uploadProjectPics = upload.fields([
@@ -81,29 +83,63 @@ exports.getProjects = catchAsync(async(req, res, next) => {
 });
 
 exports.createProject = catchAsync(async(req, res, next) => {
+    let text = JSON.parse(req.body.text);
     if(!req.files){
         const err = new ApiErrors(`You have to add an image, its required`, 404);
         return next(err);
     }
     await crearFoto(req);
 
-    // Crear la nueva skill
+    // Crear el nuevo proyecto
     const newProject = await Project.create({
         nombre: req.body.nombre,
         image: req.body.image,
         focus: req.body.focus,
         usage: req.body.usage,
-        text: req.body.text,
+        text: text,
         completionDate: req.body.completionDate,
-        technologies: req.body.technologies,
         githubUrl: req.body.githubUrl,
         liveUrl: req.body.liveUrl,
         gallery: req.body.gallery
     });
 
+    let reformat = req.body.technologies.split(",");
+    reformat.forEach(el => {
+        newProject.technologies.push(el);
+    });
+    await newProject.save();
+
     res.status(201).json({
         status: "success",
         message: "Proyecto creada con exito",
         data: newProject
+    })
+});
+
+exports.deleteProject = catchAsync(async(req, res, next) => {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_NAME,
+        api_key: process.env.CLOUDINARY_KEY,
+        api_secret: process.env.CLOUDINARY_SECRET,
+        secure: true
+    });
+    const project = await Project.findById(req.params.id);
+    if(!project) {
+        return next(new ApiErrors(`The document with this id (${req.params.id}) doesnt exist`, 404))
+    }
+    // Delete the thumbnail image
+    let photo = project.image.split("/");
+    console.log(photo);
+    await cloudinary.uploader.destroy(photo[photo.length - 1]);
+    // Delete the gallery images
+    project.gallery.forEach(async (img) => {
+        let pic = img.split("/");
+        await cloudinary.uploader.destroy(pic[pic.length - 1]);
+    })
+    await project.delete();
+    res.status(204).json({
+        status: "success",
+        message: "Project deleted.",
+        data: null
     })
 });
