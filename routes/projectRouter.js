@@ -10,6 +10,7 @@ projectRouter
 
 projectRouter
     .route("/:id")
+    .patch(projectController.uploadProjectPics, projectController.editProject)
     .delete(projectController.deleteProject);
     
 module.exports = projectRouter;
