@@ -188,3 +188,14 @@ exports.editProject = catchAsync(async(req, res, next) => {
         data: project
     })
 });
+
+exports.getBySlug = catchAsync(async(req, res, next) => {
+    const project = await Project.findOne({slug: req.params.id});
+    if(!project){
+        return next(new ApiErrors(`The project with the slug ${req.params.slug} doesn't exist`, 404));
+    }
+    res.status(200).json({
+        message: "Project found",
+        data: project
+    })
+});

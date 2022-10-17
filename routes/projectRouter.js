@@ -10,6 +10,7 @@ projectRouter
 
 projectRouter
     .route("/:id")
+    .get(projectController.getBySlug)
     .patch(projectController.uploadProjectPics, projectController.editProject)
     .delete(projectController.deleteProject);
     
