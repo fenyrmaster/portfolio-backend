@@ -4,6 +4,7 @@ const sharp = require("sharp");
 const ApiErrors = require("../utils/appError");
 const uuid = require("uuid");
 const cloudinary = require("cloudinary").v2;
+const Email = require("../utils/email");
 const Project = require("../models/projectModel");
 const APIfeatures = require("../utils/APIFeatures");
 const { json } = require("express");
@@ -199,3 +200,13 @@ exports.getBySlug = catchAsync(async(req, res, next) => {
         data: project
     })
 });
+
+//Functions for other purposes
+exports.sendEmails = catchAsync(async(req,res,next) => {
+    await new Email(req.body.client, req.body.topic, req.body.email).sendWelcome();
+    await new Email(req.body.client, req.body.topic, req.body.email).sendToMyself(req.body.message);
+    res.status(200).json({
+        message: "Emails send",
+        status: "success"
+    })
+})
