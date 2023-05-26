@@ -13,6 +13,7 @@ const mongoSanitizer = require("express-mongo-sanitize");
 //Routers for the api
 const skillRouter = require("./routes/skillRouter");
 const projectRouter = require("./routes/projectRouter");
+const blogRouter = require("./routes/blogRouter");
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use(compression());
 
 app.use("/api/skills", skillRouter);
 app.use("/api/projects", projectRouter);
+app.use("/api/blog", blogRouter);
 
 app.all("*", (req,res,next) => {
   const err = new ApiErrors(`the given URL (${req.originalUrl}) is not valid`, 404);
