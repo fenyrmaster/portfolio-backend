@@ -7,10 +7,18 @@ const blogModel = new mongoose.Schema({
         required: true,
         trim: true
     },
+    views: {
+        type: Number,
+        default: 0
+    },
     intro: {
         type: String,
         required: true,
         trim: true
+    },
+    image: {
+        type: String,
+        required: true
     },
     slug: String,
     time: {

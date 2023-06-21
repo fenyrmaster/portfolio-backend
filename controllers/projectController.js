@@ -132,7 +132,6 @@ exports.deleteProject = catchAsync(async(req, res, next) => {
     }
     // Delete the thumbnail image
     let photo = project.image.split("/");
-    console.log(photo);
     await cloudinary.uploader.destroy(photo[photo.length - 1]);
     // Delete the gallery images
     project.gallery.forEach(async (img) => {
@@ -153,6 +152,7 @@ exports.editProject = catchAsync(async(req, res, next) => {
         return next(new ApiErrors(`The document with this id (${req.params.id}) doesnt exist`, 404))
     }
     let text = JSON.parse(req.body.text);
+    // If we want to change the image, we set the old one, so we can delete it from our cloud storage
     if(Object.keys(req.files).length !== 0){
         let oldPic = projectOld.image;
         await crearFoto(req, oldPic);
@@ -185,7 +185,7 @@ exports.editProject = catchAsync(async(req, res, next) => {
 
     res.status(200).json({
         status: "success",
-        message: "Skill Editada con exito",
+        message: "Proyecto Editado con exito",
         data: project
     })
 });

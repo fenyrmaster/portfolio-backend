@@ -69,8 +69,7 @@ exports.protect = catchAsync(async (req,res,next) => {
     if(!token){
         return next(new ApiErrors("Wheres the token lowalski, WHERE IS THE GODAMN TOKEN", 401))
     }
-    const decoded = await promisify(JWT.verify)(token,process.env.JWT_SECRET);
-    console.log(decoded);
+    await promisify(JWT.verify)(token,process.env.JWT_SECRET);
     next();
 });
 
