@@ -60,7 +60,7 @@ exports.login = catchAsync(async (req,res,next) => {
 });
 
 exports.protect = catchAsync(async (req,res,next) => {
-    let token
+    let token;
     if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         token = req.headers.authorization.split(" ")[1];
     } else if(req.cookies.jwt){
@@ -74,7 +74,7 @@ exports.protect = catchAsync(async (req,res,next) => {
 });
 
 exports.validate = catchAsync(async (req,res,next) => {
-    let token
+    let token;
     if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         token = req.headers.authorization.split(" ")[1];
     } else if(req.cookies.jwt){
@@ -89,6 +89,6 @@ exports.validate = catchAsync(async (req,res,next) => {
     }
     res.status(200).json({
         status: "Success",
-        message: "testing the decoded property"
+        message: "Data validated"
     })
 });

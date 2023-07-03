@@ -38,7 +38,7 @@ const crearFoto = async (request, oldPic) => {
         await cloudinary.uploader.upload(`public/img/blogs/${imagenBlog}`,{
             resource_type: "image",
             public_id: imagenBlog
-        });
+        },function(error, result) {console.log(error, result); });
         //Obtener el url de la imagen y guardarla
         let url = await cloudinary.image(imagenBlog);
         let urlCortada = url.split("=")[1].split("'")[1];
@@ -150,6 +150,8 @@ exports.getBySlug = catchAsync(async(req, res, next) => {
     if(!entry){
         return next(new ApiErrors(`The entry with the slug ${req.params.slug} doesn't exist`, 404));
     }
+    entry.views = entry.views + 1;
+    await entry.save();
     res.status(200).json({
         message: "Entry found",
         data: entry
